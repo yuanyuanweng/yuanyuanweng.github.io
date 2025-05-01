@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>恐龍星球心理測驗</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background: #10253d url('背景圖.jpg') repeat;
+      background-size: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+    }
+    #start-screen, #quiz-container, #result-container {
+      margin-top: 60px;
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(156, 216, 249, 0.664);
+    }
+    #start-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    #start-button img {
+      max-width: 300px;
+    }
+    .question-image {
+      max-width: 300px;
+      margin: 10px auto;
+    }
+    .option {
+      background: #fff;
+      border: 2px solid #000;
+      border-radius: 12px;
+      padding: 10px 20px;
+      margin: 10px 0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option:hover {
+      background: #f0f0f0;
+    }
+    .progress-bar {
+      margin-top: 20px;
+      height: 10px;
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      background: #00b4d8;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .result-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="start-screen">
+    <button id="start-button">
+      <img src="ddeaddcd-ba9e-4b70-b80c-f264b88febc5.png" alt="立即出發">
+    </button>
+  </div>
+
+  <div id="quiz-container" style="display:none">
+    <div id="question-image"></div>
+    <h2 id="question-text"></h2>
+    <div id="options"></div>
+    <div class="progress-bar">
+      <div class="progress" id="progress"></div>
+    </div>
+  </div>
+
+  <div id="result-container" style="display:none">
+    <h2>其實你是來自這個星球的外星人...</h2>
+    <div class="result-card" id="result"></div>
+    <h3>適合一起旅行的恐龍星球夥伴：</h3>
+    <div class="result-card" id="companions"></div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "早上醒來的時候，身旁突然多了一隻恐龍，你會?",
+        image: "q1.jpg",
+        options: [
+          { text: "平靜接受，問他怎麼沒穿衣服", type: "D-HEA03" },
+          { text: "警覺，懷疑他是穿著恐龍衣服的小偷", type: "D-LOG02" },
+          { text: "覺得自己沒睡醒，繼續睡覺", type: "D-KNO05" },
+          { text: "開心，心想可以偷偷研究恐龍，搞不好會得諾貝爾獎", type: "D-ART01" }
+        ]
+      },
+      {
+        text: "恐龍很稀鬆平常的在你家住下來，他想學習煮飯，你會怎麼教他？",
+        image: "q2.png",
+        options: [
+          { text: "好啊，一起煮飯，還可以一起聊天", type: "D-HEA03" },
+          { text: "叫恐龍自己學，現在網路上很多資源", type: "D-KNO05" },
+          { text: "專注、細心的教導他，認真教學不閒聊", type: "D-LOG02" },
+          { text: "問恐龍想學煮飯的理由，看看理由是什麼再做決定", type: "D-FEA06" }
+        ]
+      },
+      {
+        text: "恐龍很聰明，學會了煮飯。有一天，恐龍整天都沒有說話，你會?",
+        image: "q3.png",
+        options: [
+          { text: "直接問恐龍自己是不是惹他不開心了", type: "D-HEA03" },
+          { text: "心想:他今天幹嘛臭臉，那我也要臭臉回去", type: "D-EXP04" },
+          { text: "問恐龍假日要不要一起出門旅行", type: "D-ART01" },
+          { text: "悄悄買十個恐龍最喜歡的冰火菠蘿油給他", type: "D-FEA06" }
+        ]
+      },
+      {
+        text: "你平常在雜誌編輯部上班，需要想一個和旅行有關的企劃主題，你腦中第一個想到的是?",
+        image: "q4.png",
+        options: [
+          { text: "我們來漆陶!_發揮創造力手作陶土", type: "D-ART01" },
+          { text: "「我只想吃好吃的」之旅", type: "D-EXP04" },
+          { text: "上山下海，出入平安_山海相伴的大自然旅行", type: "D-HEA03" },
+          { text: "學習知識的旅程", type: "D-KNO05" }
+        ]
+      },
+      {
+        text: "公司給你一個假期，讓你四處走走獲取計畫靈感，你打算和恐龍一起去，你的心情是?",
+        image: "q5.png",
+        options: [
+          { text: "會不會放完假我就被開除了，這是一個暗示嗎!好擔心啊。", type: "D-FEA06" },
+          { text: "耶，我要開始規劃行程了，還要仔細考量預算", type: "D-LOG02" },
+          { text: "很興奮的跟恐龍大吼大叫，找他一起討論", type: "D-EXP04" },
+          { text: "有點不想出遠門，在辦公室找資料比較輕鬆啦", type: "D-KNO05" }
+        ]
+      },
+      {
+        text: "你和恐龍踏上了旅程，他說有個秘密想告訴你，你覺得會是?",
+        image: "q6.png",
+        options: [
+          { text: "我喜歡你...!", type: "D-HEA03" },
+          { text: "其實也沒什麼，只是想認真的謝謝你，和你去旅行很開心", type: "D-EXP04" },
+          { text: "我有一個想去的地方，那裡對我來說很重要，可以讓我獨自去嗎?", type: "D-FEA06" },
+          { text: "我其實是外星人，我要回去我原本的星球了", type: "D-FEA06" }
+        ]
+      }
+    ];
+  
+    const results = {
+      "D-ART01": {
+        name: "創作星：米卡星",
+        description: "你是具創意和幽默感的藝術家型人格！",
+        travel: "推薦地點：鶯歌陶瓷老街、松菸文創園區",
+        partner: "你的夥伴是：D-HEA03（比拉星）與 D-EXP04（洛特星）",
+        image: "result-art.png"
+      },
+      "D-LOG02": {
+        name: "邏輯星：艾羅星",
+        description: "你務實、理性，是冷靜的分析者！",
+        travel: "推薦地點：台中科博館、工研院未來館",
+        partner: "你的夥伴是：D-KNO05（奧思星）與 D-FEA06（奈恩星）",
+        image: "result-logic.png"
+      },
+      "D-HEA03": {
+        name: "療癒星：比拉星",
+        description: "你溫柔貼心，是別人心靈的依靠！",
+        travel: "推薦地點：台南安平、花蓮文創園區",
+        partner: "你的夥伴是：D-ART01（米卡星）與 D-KNO05（奧思星）",
+        image: "result-heal.png"
+      },
+      "D-EXP04": {
+        name: "冒險星：洛特星",
+        description: "你好奇、衝動，是充滿能量的探險家！",
+        travel: "推薦地點：小琉球浮潛、南投溪頭",
+        partner: "你的夥伴是：D-HEA03（比拉星）與 D-FEA06（奈恩星）",
+        image: "result-exp.png"
+      },
+      "D-KNO05": {
+        name: "知識星：奧思星",
+        description: "你內向安靜，是熱愛思考的學者型人格！",
+        travel: "推薦地點：成大校園、故宮博物院",
+        partner: "你的夥伴是：D-LOG02（艾羅星）與 D-ART01（米卡星）",
+        image: "result-know.png"
+      },
+      "D-FEA06": {
+        name: "未來星：奈恩星",
+        description: "你敏感且具直覺，總在思考生命與宇宙！",
+        travel: "推薦地點：淡水海邊、野柳女王頭",
+        partner: "你的夥伴是：D-EXP04（洛特星）與 D-HEA03（比拉星）",
+        image: "result-future.png"
+      }
+    };
+  
+    let currentQuestion = 0;
+    const scores = {};
+  
+    document.getElementById("start-button").onclick = () => {
+      document.getElementById("start-screen").style.display = "none";
+      document.getElementById("quiz-container").style.display = "block";
+      loadQuestion();
+    };
+  
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById("question-text").textContent = q.text;
+      document.getElementById("question-image").innerHTML = `<img class="question-image" src="${q.image}" alt="Q${currentQuestion + 1}">`;
+      document.getElementById("options").innerHTML = "";
+  
+      q.options.forEach(option => {
+        const btn = document.createElement("div");
+        btn.className = "option";
+        btn.textContent = option.text;
+        btn.onclick = () => {
+          scores[option.type] = (scores[option.type] || 0) + 1;
+          currentQuestion++;
+          updateProgress();
+          if (currentQuestion < questions.length) loadQuestion();
+          else showResult();
+        };
+        document.getElementById("options").appendChild(btn);
+      });
+    }
+  
+    function updateProgress() {
+      const percent = Math.round((currentQuestion / questions.length) * 100);
+      document.getElementById("progress").style.width = percent + "%";
+    }
+  
+    function showResult() {
+      document.getElementById("quiz-container").style.display = "none";
+      document.getElementById("result-container").style.display = "block";
+  
+      const topType = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+      const res = results[topType];
+      document.getElementById("result").innerHTML = `
+        <h3>${res.name}</h3>
+        <p>${res.description}</p>
+        <p>${res.travel}</p>
+        <img src="${res.image}" alt="${res.name}" style="max-width: 200px;">
+      `;
+      document.getElementById("companions").innerHTML = `<p>${res.partner}</p>`;
+    }
+  </script>
+  
+</body>
+</html>
